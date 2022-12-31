@@ -1,4 +1,4 @@
-import { UserEntity } from './user';
+import { UserEntity } from '@entities/index';
 
 class LoginEntity {
   id: string;

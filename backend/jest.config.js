@@ -18,6 +18,10 @@ module.exports = {
   setupFiles: ['dotenv/config'],
   moduleNameMapper: {
     '@root/(.*)': '<rootDir>/src/$1',
+    '@dtos/(.*)': '<rootDir>/src/infra/dto/$1',
+    '@entities/(.*)': '<rootDir>/src/infra/entities/$1',
+    '@valueobjects/(.*)': '<rootDir>/src/infra/value-objects/$1',
+
     '@testRoot/(.*)': '<rootDir>/test/$1',
   },
 };

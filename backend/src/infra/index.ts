@@ -3,3 +3,5 @@
   como configuração do banco de dados, repositories, entities, value-objects 
 */
 export * from './entities';
+export * from './dto';
+export * from './value-objects';

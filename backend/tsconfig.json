@@ -19,6 +19,9 @@
     "noFallthroughCasesInSwitch": false,
     "paths": {
       "@root/*": ["src/*"],
+      "@dtos/*": ["src/infra/dto/*"],
+      "@entities/*": ["src/infra/entities/*"],
+      "@valueobjects/*": ["src/infra/value-objects/*"],
       "@testRoot/*": ["test/*"]
     }
   }
