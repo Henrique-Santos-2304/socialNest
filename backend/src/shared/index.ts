@@ -4,3 +4,4 @@
   Pois aqui colocamos funções, constantes, validações 
   que serão usadas em diversas camadas da aplicação
 */
+export * from './cryptograph';
