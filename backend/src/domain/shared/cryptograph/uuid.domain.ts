@@ -3,7 +3,7 @@ interface IUuidService {
 }
 
 namespace IUuidService {
-  export type createResponse = Promise<string>;
+  export type createResponse = string;
 }
 
 export { IUuidService };

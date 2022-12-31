@@ -1,23 +1,32 @@
 import { CreateImageDto } from '@dtos/index';
 import { ImageEntity } from '@entities/index';
+import { IUuidService } from '@root/domain';
 
 class ImageValueObject {
   private image: ImageEntity;
 
-  constructor() {
+  constructor(private readonly uuidService: IUuidService) {
     this.image = new ImageEntity();
-    this.image.id = crypto.randomUUID().toString();
     this.image.created_at = new Date();
+    this.setId();
   }
 
-  async create(imageData: CreateImageDto): Promise<void> {
+  get id(): Promise<ImageEntity['id']> {
+    return (async () => this.image.id)();
+  }
+
+  private setId() {
+    this.image.id = this.uuidService.create();
+  }
+
+  set create(imageData: CreateImageDto) {
     this.image.user_id = imageData.user_id;
     this.image.title = imageData.title;
     this.image.url = imageData.url;
   }
 
-  async get(): Promise<ImageEntity> {
-    return this.image;
+  get get(): Promise<ImageEntity> {
+    return (async () => this.image)();
   }
 }
 

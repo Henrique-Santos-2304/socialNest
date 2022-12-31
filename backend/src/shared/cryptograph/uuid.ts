@@ -10,7 +10,7 @@ import {
 class UuidService implements IUuidService {
   constructor(private readonly logger: Logger) {}
 
-  async create(): IUuidService.createResponse {
+  create(): IUuidService.createResponse {
     try {
       return crypto.randomUUID().toString();
     } catch (error) {
