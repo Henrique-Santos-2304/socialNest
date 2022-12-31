@@ -1,4 +1,7 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
+import { UuidService } from './shared';
 
-@Module({})
+@Module({
+  providers: [UuidService, Logger],
+})
 export class AppModule {}

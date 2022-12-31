@@ -1,5 +1,5 @@
 import { IUuidService } from '@root/domain';
-import crypto from 'node:crypto';
+import * as crypto from 'node:crypto';
 import {
   Injectable,
   InternalServerErrorException,
@@ -10,10 +10,11 @@ import {
 class UuidService implements IUuidService {
   constructor(private readonly logger: Logger) {}
 
-  create(): IUuidService.createResponse {
+  async create(): IUuidService.createResponse {
     try {
-      return crypto.randomUUID().toString();
+      return crypto.randomUUID();
     } catch (error) {
+      console.log(error.message);
       this.logger.warn('Error in create uuid service');
       this.logger.error(error.message);
       throw new InternalServerErrorException();
