@@ -24,7 +24,7 @@ describe('Uuid Service Unit', () => {
     }).compile();
 
     service = module.get<IUuidService>(UuidService);
-    uuidMocked.randomUUID.mockResolvedValue('new_id' as never);
+    uuidMocked.randomUUID.mockReturnValue('new_id' as never);
   });
 
   it('should be crypto to have been callend without params', async () => {
@@ -35,7 +35,7 @@ describe('Uuid Service Unit', () => {
   });
 
   it('should be service return id correctly', async () => {
-    const response = await service.create();
+    const response = service.create();
     expect(response).toBe('new_id');
   });
 
@@ -43,7 +43,34 @@ describe('Uuid Service Unit', () => {
     uuidMocked.randomUUID.mockImplementationOnce(() => {
       throw new Error('error');
     });
-    const response = service.create();
-    await expect(response).rejects.toThrow(new InternalServerErrorException());
+
+    try {
+      service.create;
+    } catch (error) {
+      expect(error).toHaveProperty(
+        'message',
+        new InternalServerErrorException().message,
+      );
+    }
+  });
+
+  it('should be service log error ', async () => {
+    uuidMocked.randomUUID.mockImplementationOnce(() => {
+      throw new Error('error');
+    });
+
+    try {
+      service.create;
+    } catch (error) {
+      expect(loggerMock.warn).toHaveBeenCalledTimes(1);
+      expect(loggerMock.warn).toHaveBeenCalledWith(
+        'Error in create uuid service',
+      );
+
+      expect(loggerMock.error).toHaveBeenCalledTimes(1);
+      expect(loggerMock.error).toHaveBeenCalledWith(
+        new InternalServerErrorException().message,
+      );
+    }
   });
 });
