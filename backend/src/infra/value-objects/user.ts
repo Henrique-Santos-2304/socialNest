@@ -8,11 +8,11 @@ class UserValueObject {
 
   constructor(private readonly uuidService: IUuidService) {
     this.user = new UserEntity();
-    this.setId();
+    (async () => this.setId())();
   }
 
-  private setId() {
-    this.user.id = this.uuidService.create();
+  private async setId() {
+    this.user.id = await this.uuidService.create();
   }
 
   get id(): Promise<UserEntity['id']> {

@@ -7,26 +7,45 @@ class ImageValueObject {
 
   constructor(private readonly uuidService: IUuidService) {
     this.image = new ImageEntity();
-    this.image.created_at = new Date();
-    this.setId();
+    this.builder.setId().setDate();
   }
 
-  get id(): Promise<ImageEntity['id']> {
-    return (async () => this.image.id)();
-  }
+  private builder = {
+    setId: () => {
+      this.image.id = this.uuidService.create();
+      return this.builder;
+    },
+    setUserId: (user_id: ImageEntity['user_id']) => {
+      this.image.user_id = user_id;
+      return this.builder;
+    },
+    setTitle: (title: ImageEntity['title']) => {
+      this.image.title = title;
+      return this.builder;
+    },
+    setUrl: (url: ImageEntity['url']) => {
+      this.image.url = url;
+      return this.builder;
+    },
+    setDate: () => {
+      this.image.created_at = new Date();
+      return this.builder;
+    },
+  };
 
-  private setId() {
-    this.image.id = this.uuidService.create();
+  get id(): ImageEntity['id'] {
+    return this.image.id;
   }
 
   set create(imageData: CreateImageDto) {
-    this.image.user_id = imageData.user_id;
-    this.image.title = imageData.title;
-    this.image.url = imageData.url;
+    this.builder
+      .setTitle(imageData.title)
+      .setUrl(imageData.url)
+      .setUserId(imageData.user_id);
   }
 
-  get get(): Promise<ImageEntity> {
-    return (async () => this.image)();
+  get get(): ImageEntity {
+    return this.image;
   }
 }
 

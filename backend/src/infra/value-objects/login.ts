@@ -7,11 +7,11 @@ class LoginValueObject {
 
   constructor(private readonly uuidService: IUuidService) {
     this.login = new LoginEntity();
-    this.setId();
+    (async () => this.setId())();
   }
 
-  private setId() {
-    this.login.id = this.uuidService.create();
+  private async setId() {
+    this.login.id = await this.uuidService.create();
   }
 
   get id(): Promise<LoginEntity['id']> {
