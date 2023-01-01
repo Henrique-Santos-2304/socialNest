@@ -7,28 +7,46 @@ class LoginValueObject {
 
   constructor(private readonly uuidService: IUuidService) {
     this.login = new LoginEntity();
-    (async () => this.setId())();
+    this.builder.setId();
   }
 
-  private async setId() {
-    this.login.id = await this.uuidService.create();
+  private builder = {
+    setId: () => {
+      this.login.id = this.uuidService.create();
+      return this.builder;
+    },
+    setUserId: (userId: LoginEntity['user_id']) => {
+      this.login.user_id = userId;
+      return this.builder;
+    },
+    setField: (field: LoginEntity['field']) => {
+      this.login.field = field;
+      return this.builder;
+    },
+    setValueField: (valueField: LoginEntity['value_field']) => {
+      this.login.value_field = valueField;
+      return this.builder;
+    },
+    setPassword: (password: LoginEntity['password']) => {
+      this.login.password = password;
+      return this.builder;
+    },
+  };
+
+  get id(): LoginEntity['id'] {
+    return this.login.id;
   }
 
-  get id(): Promise<LoginEntity['id']> {
-    return (async () => this.login.id)();
+  set create({ user_id, password, field, value_field }: CreateLoginDto) {
+    this.builder
+      .setUserId(user_id)
+      .setField(field)
+      .setValueField(value_field)
+      .setPassword(password);
   }
 
-  set create(loginData: CreateLoginDto) {
-    (async () => {
-      this.login.field = loginData.field;
-      this.login.password = loginData.password;
-      this.login.user_id = loginData.user_id;
-      this.login.value_field = loginData.value_field;
-    })();
-  }
-
-  get get(): Promise<LoginEntity> {
-    return (async () => this.login)();
+  get get(): LoginEntity {
+    return this.login;
   }
 }
 
