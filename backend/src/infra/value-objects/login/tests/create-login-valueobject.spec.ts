@@ -1,6 +1,6 @@
 import { mock, MockProxy } from 'jest-mock-extended';
 import { IUuidService } from '@root/domain';
-import { LoginValueObject } from '../login';
+import { LoginValueObject } from '..';
 
 describe('Image value Object Unit', () => {
   let uuidService: MockProxy<IUuidService>;
