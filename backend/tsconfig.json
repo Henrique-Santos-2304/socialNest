@@ -22,6 +22,8 @@
       "@dtos/*": ["src/infra/dto/*"],
       "@entities/*": ["src/infra/entities/*"],
       "@valueobjects/*": ["src/infra/value-objects/*"],
+      "@services/*": ["src/data/services/*"],
+
       "@testRoot/*": ["test/*"]
     }
   }

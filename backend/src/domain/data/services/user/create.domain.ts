@@ -1,15 +1,15 @@
 import { TypeServiceReponse } from '@root/domain';
 import { CreateUserDto } from '@root/infra';
 
-interface ICreateUserService {
-  create(
-    createUser: ICreateUserService.CreateParams,
-  ): ICreateUserService.CreateResponse;
+abstract class CreateUserServiceContract {
+  abstract create(createUser: CreateUserParamsProps): CreateUserResponseProps;
 }
 
-namespace ICreateUserService {
-  export type CreateParams = CreateUserDto;
-  export type CreateResponse = Promise<TypeServiceReponse>;
-}
+type CreateUserParamsProps = CreateUserDto;
+type CreateUserResponseProps = Promise<TypeServiceReponse>;
 
-export { ICreateUserService };
+export {
+  CreateUserServiceContract,
+  CreateUserParamsProps,
+  CreateUserResponseProps,
+};
