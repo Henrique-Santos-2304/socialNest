@@ -33,29 +33,31 @@ describe('Encrypter Service ', () => {
   });
 
   it('"---Create---" should expect bcrypt to have been called once and valid data', async () => {
-    const spy = jest.spyOn(bcryptMocked, 'hash');
-    await service.create('password');
+    const spy = jest.spyOn(bcryptMocked, 'hashSync');
+    service.create('password');
     expect(spy).toHaveBeenCalledTimes(1);
     expect(spy).toHaveBeenCalledWith('password', 10);
   });
 
   it('"---Create---" should expect service to throw "ENCRYPT ERROR" if bcrypt.hash ocurred an error', async () => {
-    jest
-      .spyOn(bcryptMocked, 'hash')
-      .mockRejectedValueOnce(new Error('error') as never);
-    const response = service.create('password');
-    await expect(response).rejects.toThrow(new Error('ENCRYPT ERROR'));
+    jest.spyOn(bcryptMocked, 'hashSync').mockImplementationOnce(() => {
+      throw new Error('error');
+    });
+    expect(() => service.create('password')).toThrow(
+      new Error('ENCRYPT ERROR'),
+    );
   });
 
-  it('"---Create---" should expect log warning and error message if bcrypt.hash ocurred an error', async () => {
-    jest
-      .spyOn(bcryptMocked, 'hash')
-      .mockRejectedValueOnce(new Error('error') as never);
+  it('"---Create---" should expect log warning and error message if bcrypt.hash ocurred an error', () => {
     const spyWarn = jest.spyOn(loggerMock, 'warn');
     const spyError = jest.spyOn(loggerMock, 'error');
 
-    const response = service.create('password');
-    await expect(response).rejects.toThrow(new Error('ENCRYPT ERROR'));
+    jest.spyOn(bcryptMocked, 'hashSync').mockImplementationOnce(() => {
+      throw new Error('error');
+    });
+    expect(() => service.create('password')).toThrow(
+      new Error('ENCRYPT ERROR'),
+    );
 
     expect(spyWarn).toHaveBeenCalledTimes(1);
     expect(spyWarn).toHaveBeenCalledWith('ERROR WHEN ENCRYPT PASSWORD');
@@ -66,9 +68,9 @@ describe('Encrypter Service ', () => {
 
   it('"---Create---" should expect service return hash encrypted if all ocurred nice ', async () => {
     jest
-      .spyOn(bcryptMocked, 'hash')
-      .mockResolvedValueOnce('password_encrypted' as never);
-    const response = await service.create('password');
+      .spyOn(bcryptMocked, 'hashSync')
+      .mockReturnValueOnce('password_encrypted' as never);
+    const response = service.create('password');
     expect(response).toBe('password_encrypted');
   });
 

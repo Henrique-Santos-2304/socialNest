@@ -14,9 +14,9 @@ class EncrypterService implements IEncrypterService {
 
   constructor(private readonly logger: Logger) {}
 
-  async create(value: string): CreateHashResponseProps {
+  create(value: string): CreateHashResponseProps {
     try {
-      const hash = await bcrypt.hash(value, this.salt);
+      const hash = bcrypt.hashSync(value, this.salt);
       return hash;
     } catch (error) {
       this.logger.warn('ERROR WHEN ENCRYPT PASSWORD');

@@ -1,16 +1,28 @@
 import { CreateLoginDto } from '@dtos/index';
 import { LoginEntity } from '@entities/index';
-import { IUuidService } from '@root/domain';
+import { IEncrypterService, IUuidService } from '@root/domain';
+
+type builderProps = {
+  setId: () => builderProps;
+  setUserId: (userId: LoginEntity['user_id']) => builderProps;
+
+  setField: (field: LoginEntity['field']) => builderProps;
+  setValueField: (valueField: LoginEntity['value_field']) => builderProps;
+  setPassword: (password: LoginEntity['password']) => builderProps;
+};
 
 class LoginValueObject {
   private login: LoginEntity;
 
-  constructor(private readonly uuidService: IUuidService) {
+  constructor(
+    private readonly uuidService: IUuidService,
+    private readonly encrypter: IEncrypterService,
+  ) {
     this.login = new LoginEntity();
     this.builder.setId();
   }
 
-  private builder = {
+  private builder: builderProps = {
     setId: () => {
       this.login.id = this.uuidService.create();
       return this.builder;
@@ -28,7 +40,9 @@ class LoginValueObject {
       return this.builder;
     },
     setPassword: (password: LoginEntity['password']) => {
-      this.login.password = password;
+      const passwordHash = this.encrypter.create(password);
+      this.login.password = passwordHash;
+
       return this.builder;
     },
   };

@@ -1,5 +1,5 @@
 type CreateHashParamsProps = string;
-type CreateHashResponseProps = Promise<string>;
+type CreateHashResponseProps = string;
 
 type CompareHashParamsProps = { hash: string; compare: string };
 type CompareHashResponseProps = Promise<boolean>;
