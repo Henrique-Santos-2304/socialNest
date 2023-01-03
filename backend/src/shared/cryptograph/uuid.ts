@@ -1,4 +1,4 @@
-import { IUuidService } from '@root/domain';
+import { CreateUUidResponseProps, IUuidService } from '@root/domain';
 import * as crypto from 'node:crypto';
 import {
   Injectable,
@@ -10,7 +10,7 @@ import {
 class UuidService implements IUuidService {
   constructor(private readonly logger: Logger) {}
 
-  create(): IUuidService.createResponse {
+  create(): CreateUUidResponseProps {
     try {
       return crypto.randomUUID();
     } catch (error) {

@@ -14,10 +14,12 @@
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
-    "test:watch": "jest --watch",
-    "test:cov": "jest --coverage",
-    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:unit:log": "NODE_ENV=test jest  --noStackTrace --runInBand --detectOpenHandles --forceExit --watch -c jest.unit.config.js",
+    "test:integration:log": "NODE_ENV=test jest  --noStackTrace --runInBand --detectOpenHandles --forceExit  --watch -c jest.integration.config.js",
+    "test:unit": "NODE_ENV=test npm test -- --watch -c jest.unit.config.js ",
+    "test:integration": "NODE_ENV=test npm test -- --watch -c jest.integration.config.js ",
+    "test:staged": "NODE_ENV=test npm test --findRelatedTests",
+    "test:ci": "NODE_ENV=test jest --passWithNoTests --silent --noStackTrace --runInBand --detectOpenHandles -c --collect-coverage"
   },
   "dependencies": {
     "@nestjs/common": "^9.0.0",

@@ -39,38 +39,18 @@ describe('Uuid Service Unit', () => {
     expect(response).toBe('new_id');
   });
 
-  it('should be service throw custom error if crypto response as error', async () => {
-    uuidMocked.randomUUID.mockImplementationOnce(() => {
-      throw new Error('error');
-    });
-
-    try {
-      service.create;
-    } catch (error) {
-      expect(error).toHaveProperty(
-        'message',
-        new InternalServerErrorException().message,
-      );
-    }
-  });
-
   it('should be service log error ', async () => {
     uuidMocked.randomUUID.mockImplementationOnce(() => {
       throw new Error('error');
     });
 
-    try {
-      service.create;
-    } catch (error) {
-      expect(loggerMock.warn).toHaveBeenCalledTimes(1);
-      expect(loggerMock.warn).toHaveBeenCalledWith(
-        'Error in create uuid service',
-      );
+    expect(() => service.create()).toThrow(new InternalServerErrorException());
+    expect(loggerMock.warn).toHaveBeenCalledTimes(1);
+    expect(loggerMock.warn).toHaveBeenCalledWith(
+      'Error in create uuid service',
+    );
 
-      expect(loggerMock.error).toHaveBeenCalledTimes(1);
-      expect(loggerMock.error).toHaveBeenCalledWith(
-        new InternalServerErrorException().message,
-      );
-    }
+    expect(loggerMock.error).toHaveBeenCalledTimes(1);
+    expect(loggerMock.error).toHaveBeenCalledWith('error');
   });
 });

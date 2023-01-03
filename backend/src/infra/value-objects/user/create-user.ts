@@ -41,30 +41,30 @@ class CreateUserValueObject {
     },
   };
 
-  get id(): UserEntity['id'] {
+  getId(): UserEntity['id'] {
     return this.user.id;
   }
 
   private createLogin(login: CreateLoginDto): void {
     const newLogin = new LoginValueObject(this.uuidService, this.encrypter);
-    newLogin.create = { ...login };
-    this.user.login = newLogin.get;
+    newLogin.create({ ...login });
+    this.user.login = newLogin.get();
   }
 
   private createImage(image: CreateUserDto['profile_img']): void {
     const newImage = new ImageValueObject(this.uuidService);
-    newImage.create = { ...image!, user_id: this.user.id };
-    this.user.profile_img = newImage.get;
+    newImage.create({ ...image!, user_id: this.user.id });
+    this.user.profile_img = newImage.get();
   }
 
-  public set create({ email_rescue, login, profile_img }: CreateUserDto) {
+  create({ email_rescue, login, profile_img }: CreateUserDto) {
     this.builder.setLogin({ ...login });
     profile_img && this.builder.setProfileImg(profile_img);
     email_rescue && this.builder.setEmailRescue(email_rescue);
   }
 
-  get get(): UserEntity {
-    return this.user;
+  get(): UserEntity {
+    return { ...this.user };
   }
 }
 export { CreateUserValueObject };

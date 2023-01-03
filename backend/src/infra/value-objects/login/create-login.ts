@@ -38,11 +38,11 @@ class LoginValueObject {
     },
   };
 
-  get id(): LoginEntity['id'] {
+  getId(): LoginEntity['id'] {
     return this.login.id;
   }
 
-  set create({ user_id, password, field, value_field }: CreateLoginDto) {
+  create({ user_id, password, field, value_field }: CreateLoginDto) {
     this.builder
       .setUserId(user_id)
       .setField(field)
@@ -50,8 +50,8 @@ class LoginValueObject {
       .setPassword(password);
   }
 
-  get get(): LoginEntity {
-    return this.login;
+  get(): LoginEntity {
+    return { ...this.login };
   }
 }
 

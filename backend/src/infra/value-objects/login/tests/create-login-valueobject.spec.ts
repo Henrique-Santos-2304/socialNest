@@ -21,19 +21,19 @@ describe('Login value Object Unit', () => {
   });
   it('should be login to be created an id and created_at properties when start the instance of value object ', async () => {
     const service = new LoginValueObject(uuidService, encrypter);
-    const login = service.get;
+    const login = service.get();
     expect(login.id).toBe('new_id');
   });
 
   it('should be encrypter to have been called once and valid datas', async () => {
     const spy = jest.spyOn(encrypter, 'create');
     const service = new LoginValueObject(uuidService, encrypter);
-    service.create = {
+    service.create({
       field: 'EMAIL',
       value_field: '@value_field',
       password: '1234',
       user_id: 'new_id',
-    };
+    });
     expect(spy).toHaveBeenCalledTimes(1);
     expect(spy).toHaveBeenCalledWith('1234');
   });
@@ -43,27 +43,26 @@ describe('Login value Object Unit', () => {
       throw new Error('ENCRYPTER ERROR');
     });
     const service = new LoginValueObject(uuidService, encrypter);
-    expect(
-      () =>
-        (service.create = {
-          field: 'EMAIL',
-          value_field: '@value_field',
-          password: '1234',
-          user_id: 'new_id',
-        }),
+    expect(() =>
+      service.create({
+        field: 'EMAIL',
+        value_field: '@value_field',
+        password: '1234',
+        user_id: 'new_id',
+      }),
     ).toThrow(new Error('ENCRYPTER ERROR'));
   });
 
   it('Must populate the properties url, title and userId with data sent when calling the create method ', async () => {
     jest.spyOn(encrypter, 'create').mockReturnValueOnce('encrypted');
     const service = new LoginValueObject(uuidService, encrypter);
-    service.create = {
+    service.create({
       field: 'EMAIL',
       value_field: '@value_field',
       password: '1234',
       user_id: 'new_id',
-    };
-    const login = service.get;
+    });
+    const login = service.get();
     expect(login).toHaveProperty('field', 'EMAIL');
     expect(login).toHaveProperty('value_field', '@value_field');
     expect(login).toHaveProperty('password', 'encrypted');
@@ -72,7 +71,7 @@ describe('Login value Object Unit', () => {
 
   it('I will hope received the id of class instance when calling the getter id', async () => {
     const service = new LoginValueObject(uuidService, encrypter);
-    const login = service.id;
+    const login = service.getId();
     expect(login).toBe('new_id');
   });
 });

@@ -33,19 +33,19 @@ class ImageValueObject {
     },
   };
 
-  get id(): ImageEntity['id'] {
+  getId(): ImageEntity['id'] {
     return this.image.id;
   }
 
-  set create(imageData: CreateImageDto) {
+  create(imageData: CreateImageDto) {
     this.builder
       .setTitle(imageData.title)
       .setUrl(imageData.url)
       .setUserId(imageData.user_id);
   }
 
-  get get(): ImageEntity {
-    return this.image;
+  get(): ImageEntity {
+    return { ...this.image };
   }
 }
 
