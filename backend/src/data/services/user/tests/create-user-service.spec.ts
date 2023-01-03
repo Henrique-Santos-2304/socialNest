@@ -1,19 +1,21 @@
 import { Test } from '@nestjs/testing';
 import {
   ICreateUserRepository,
-  CreateUserServiceContract,
+  ICreateUserService,
   IFindUserRepository,
   IUuidService,
+  IEncrypterService,
 } from '@root/domain';
-import { CreateUserDto, UserEntity } from '@root/infra';
+import { CreateUserDto, CreateUserValueObject, UserEntity } from '@root/infra';
 import { mock, MockProxy } from 'jest-mock-extended';
 import { CreateUserService } from '../create.service';
 
 describe('Create User Service', () => {
-  let service: CreateUserServiceContract;
+  let service: ICreateUserService;
   let createUserRepo: MockProxy<ICreateUserRepository>;
   let findUserRepo: MockProxy<IFindUserRepository>;
   let uuidService: MockProxy<IUuidService>;
+  let encrypterService: MockProxy<IEncrypterService>;
 
   const createuserMocked: CreateUserDto = {
     login: {
@@ -27,6 +29,7 @@ describe('Create User Service', () => {
     createUserRepo = mock();
     findUserRepo = mock();
     uuidService = mock();
+    encrypterService = mock();
 
     const uuidServiceProvider = {
       provide: IUuidService,
@@ -43,7 +46,7 @@ describe('Create User Service', () => {
       useValue: createUserRepo,
     };
     const serviceProvider = {
-      provide: CreateUserServiceContract,
+      provide: ICreateUserService,
       useClass: CreateUserService,
     };
     const module = await Test.createTestingModule({
@@ -55,8 +58,9 @@ describe('Create User Service', () => {
       ],
     }).compile();
 
-    service = module.get<CreateUserServiceContract>(CreateUserServiceContract);
+    service = module.get<ICreateUserService>(ICreateUserService);
     uuidService.create.mockReturnValue('id_mocked');
+    findUserRepo.by_id.mockResolvedValue(null);
   });
 
   it('should be defined', () => {
@@ -86,5 +90,65 @@ describe('Create User Service', () => {
     const response = service.create({ ...createuserMocked });
 
     await expect(response).rejects.toThrow(new Error('User Already Exists'));
+  });
+
+  it('should expects User Value Object.create to have been called once and with valid data', async () => {
+    const obj = new CreateUserValueObject(uuidService, encrypterService);
+    const user = obj.get;
+    const spy = jest.spyOn(obj, 'create', 'set');
+    await service.create({ ...createuserMocked });
+
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(spy).toHaveBeenCalledWith({
+      ...createuserMocked,
+      id: 'id_mocked',
+      created_at: user.created_at,
+    });
+  });
+
+  it('should expects service throw error if ValueObject.create to throw', async () => {
+    const obj = new CreateUserValueObject(uuidService, encrypterService);
+    jest.spyOn(obj, 'create', 'set').mockImplementationOnce(() => {
+      throw new Error('error');
+    });
+    const response = service.create({ ...createuserMocked });
+
+    await expect(response).rejects.toThrow(new Error('error'));
+  });
+
+  it('should expects User Value Object.id to have been called once and with valid data', async () => {
+    const obj = new CreateUserValueObject(uuidService, encrypterService);
+    jest
+      .spyOn(obj, 'create', 'set')
+      .mockImplementationOnce(() => new UserEntity());
+    const spy = jest.spyOn(obj, 'id', 'get');
+    await service.create({ ...createuserMocked });
+
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(spy).toHaveBeenCalledWith();
+  });
+  it('should expects service throw error if ValueObject.get to throw', async () => {
+    const obj = new CreateUserValueObject(uuidService, encrypterService);
+    jest
+      .spyOn(obj, 'create', 'set')
+      .mockImplementationOnce(() => new UserEntity());
+    jest.spyOn(obj, 'id', 'get').mockImplementationOnce(() => {
+      throw new Error('error');
+    });
+    const response = service.create({ ...createuserMocked });
+
+    await expect(response).rejects.toThrow(new Error('error'));
+  });
+
+  it('should expects service return status Sucess and ', async () => {
+    const obj = new CreateUserValueObject(uuidService, encrypterService);
+    jest
+      .spyOn(obj, 'create', 'set')
+      .mockImplementationOnce(() => new UserEntity());
+
+    jest.spyOn(obj, 'id', 'get').mockImplementationOnce(() => 'id_sucess');
+    const response = await service.create({ ...createuserMocked });
+
+    await expect(response).toBe('id_sucess');
   });
 });

@@ -1,12 +1,15 @@
 import { CreateLoginDto, CreateUserDto } from '@dtos/index';
 import { ImageValueObject, LoginValueObject } from '@valueobjects/index';
 import { UserEntity } from '@entities/index';
-import { IUuidService } from '@root/domain';
+import { IEncrypterService, IUuidService } from '@root/domain';
 
-class UserValueObject {
+class CreateUserValueObject {
   private user: UserEntity;
 
-  constructor(private readonly uuidService: IUuidService) {
+  constructor(
+    private readonly uuidService: IUuidService,
+    private readonly encrypter: IEncrypterService,
+  ) {
     this.user = new UserEntity();
     this.builder.setCreatedAt().setId();
   }
@@ -43,7 +46,7 @@ class UserValueObject {
   }
 
   private createLogin(login: CreateLoginDto): void {
-    const newLogin = new LoginValueObject(this.uuidService);
+    const newLogin = new LoginValueObject(this.uuidService, this.encrypter);
     newLogin.create = { ...login };
     this.user.login = newLogin.get;
   }
@@ -64,4 +67,4 @@ class UserValueObject {
     return this.user;
   }
 }
-export { UserValueObject };
+export { CreateUserValueObject };

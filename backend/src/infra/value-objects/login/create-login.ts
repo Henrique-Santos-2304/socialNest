@@ -1,15 +1,7 @@
 import { CreateLoginDto } from '@dtos/index';
 import { LoginEntity } from '@entities/index';
 import { IEncrypterService, IUuidService } from '@root/domain';
-
-type builderProps = {
-  setId: () => builderProps;
-  setUserId: (userId: LoginEntity['user_id']) => builderProps;
-
-  setField: (field: LoginEntity['field']) => builderProps;
-  setValueField: (valueField: LoginEntity['value_field']) => builderProps;
-  setPassword: (password: LoginEntity['password']) => builderProps;
-};
+import { CreateLoginBuilderProps } from './types/create-login.props';
 
 class LoginValueObject {
   private login: LoginEntity;
@@ -22,7 +14,7 @@ class LoginValueObject {
     this.builder.setId();
   }
 
-  private builder: builderProps = {
+  private builder: CreateLoginBuilderProps = {
     setId: () => {
       this.login.id = this.uuidService.create();
       return this.builder;
@@ -42,7 +34,6 @@ class LoginValueObject {
     setPassword: (password: LoginEntity['password']) => {
       const passwordHash = this.encrypter.create(password);
       this.login.password = passwordHash;
-
       return this.builder;
     },
   };

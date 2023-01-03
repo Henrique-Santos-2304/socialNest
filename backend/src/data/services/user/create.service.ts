@@ -1,14 +1,14 @@
 import {
   CreateUserServiceParamsProps,
   CreateUserServiceResponseProps,
-  ICreateUserRepository,
+  ICreateUserService,
 } from '@root/domain';
 
-class CreateUserService implements ICreateUserRepository {
+class CreateUserService implements ICreateUserService {
   async create(
     createUser: CreateUserServiceParamsProps,
   ): CreateUserServiceResponseProps {
-    return { status: 'Sucess' };
+    return { id: 'user' };
   }
 }
 
