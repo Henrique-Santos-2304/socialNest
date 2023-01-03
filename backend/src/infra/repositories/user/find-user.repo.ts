@@ -1,49 +1,69 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { UserEntity } from '@root/infra/entities';
+import { PrismaService } from '@root/infra/manager-db';
 import {
   AllUserResponseProps,
   FindUserWithoutPasswordResponseProps,
+  FindUserWithPasswordResponseProps,
   IFindUserRepository,
 } from '@root/domain';
-import { UserEntity } from '@root/infra/entities';
-import { PrismaService } from '@root/infra/manager-db';
 
 @Injectable()
 class FindUserRepository implements IFindUserRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly logger: Logger,
+  ) {}
 
-  newUser: UserEntity = {
-    id: 'login',
-    created_at: new Date(),
-    updated_at: null,
-    login: {
-      id: 'login',
-      field: 'EMAIL',
-      value_field: 'email',
-      user_id: 'user_id',
-      password: 'password',
-    },
-    profile_img: null,
-    email_rescue: 'email',
-  };
-
-  async by_id(id: string): Promise<FindUserWithoutPasswordResponseProps> {
-    const withoutPassword = {
-      ...this.newUser,
-      login: {
-        id: this.newUser.login.id,
-        field: this.newUser.login.field,
-        value_field: this.newUser.login.value_field,
-        user_id: this.newUser.login.user_id,
-      },
-    };
-    return withoutPassword;
+  async by_id(id: string): FindUserWithoutPasswordResponseProps {
+    try {
+      const newUser = await this.prisma.user.findFirst({
+        where: { id },
+        include: {
+          login: {
+            select: { id: true, field: true, user_id: true, value_field: true },
+          },
+          profile_img: true,
+        },
+      });
+      return newUser as FindUserWithoutPasswordResponseProps | null;
+    } catch (error) {
+      this.logger.warn('---Repository---- Error in find user by id');
+      this.logger.error(error.message);
+      throw new Error('Query Error');
+    }
   }
 
-  async by_login(login: string): Promise<UserEntity> {
-    return this.newUser;
+  async by_login(login: string): FindUserWithPasswordResponseProps {
+    try {
+      const newUser = await this.prisma.user.findFirst({
+        where: { login: { value_field: login } },
+        include: {
+          login: true,
+          profile_img: true,
+        },
+      });
+      return newUser as UserEntity | null;
+    } catch (error) {
+      this.logger.warn('---Repository---- Error in find user by login');
+      this.logger.error(error.message);
+      throw new Error('Query Error');
+    }
   }
   async all(): AllUserResponseProps {
-    return [{ ...this.newUser }];
+    try {
+      const newUser = await this.prisma.user.findMany({
+        include: {
+          login: true,
+          profile_img: true,
+        },
+      });
+      return newUser;
+    } catch (error) {
+      this.logger.warn('---Repository---- Error find all users');
+      this.logger.error(error.message);
+      throw new Error('Query Error');
+    }
   }
 }
 

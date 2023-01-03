@@ -1,11 +1,15 @@
+import { Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { IFindUserRepository } from '@root/domain';
 import { UserEntity } from '@root/infra/entities';
 import { PrismaService } from '@root/infra/manager-db';
+import { mock } from 'jest-mock-extended';
 import { FindUserRepository } from '../find-user.repo';
 
 describe('Find User Repository Unit Tests', () => {
   let service: IFindUserRepository;
+  let loggerMock: Logger;
+
   const prismaMocked = {
     user: {
       findFirst: jest.fn(),
@@ -29,6 +33,7 @@ describe('Find User Repository Unit Tests', () => {
   };
 
   beforeEach(async () => {
+    loggerMock = mock();
     const repoProvider = {
       provide: IFindUserRepository,
       useClass: FindUserRepository,
@@ -39,13 +44,16 @@ describe('Find User Repository Unit Tests', () => {
       useValue: prismaMocked,
     };
 
+    const loggerProvider = {
+      provide: Logger,
+      useValue: loggerMock,
+    };
+
     const module: TestingModule = await Test.createTestingModule({
-      providers: [prismaProvider, repoProvider],
+      providers: [prismaProvider, repoProvider, loggerProvider],
     }).compile();
 
     service = module.get(IFindUserRepository);
-    prismaMocked.user.findFirst.mockResolvedValue({ ...user });
-    prismaMocked.user.findMany.mockResolvedValue([{ ...user }, { ...user }]);
   });
 
   it('should expect the service to be defined', () => {
@@ -54,7 +62,7 @@ describe('Find User Repository Unit Tests', () => {
   });
 
   // tests by_id
-  it('repo.find must to have been called once time and with data valids  ', async () => {
+  it('"---By Id---" repo.find must to have been called once time and with data valids  ', async () => {
     const spy = jest.spyOn(prismaMocked.user, 'findFirst');
 
     await service.by_id(user.id);
@@ -72,20 +80,38 @@ describe('Find User Repository Unit Tests', () => {
     });
   });
 
-  it('service must to throw Query Error if ocurred an error in repository ', async () => {
+  it('"---By Id---"  service must to throw Query Error if ocurred an error in repository ', async () => {
     prismaMocked.user.findFirst.mockRejectedValueOnce(new Error('Query Error'));
 
     const response = service.by_id(user.id);
     await expect(response).rejects.toThrow('Query Error');
   });
 
-  it('service should return null if repository not found user', async () => {
+  it('"---By Id---"  service should log warning and error messages if repository error occurs', async () => {
+    const spyWarn = jest.spyOn(loggerMock, 'warn');
+    const spyError = jest.spyOn(loggerMock, 'error');
+
+    prismaMocked.user.findFirst.mockRejectedValueOnce(new Error('Query Error'));
+
+    const response = service.by_id(user.id);
+    await expect(response).rejects.toThrow('Query Error');
+
+    expect(spyWarn).toHaveBeenCalledTimes(1);
+    expect(spyWarn).toHaveBeenCalledWith(
+      '---Repository---- Error in find user by id',
+    );
+
+    expect(spyError).toHaveBeenCalledTimes(1);
+    expect(spyError).toHaveBeenCalledWith(new Error('Query Error').message);
+  });
+
+  it('"---By Id---"  service should return null if repository not found user', async () => {
     prismaMocked.user.findFirst.mockResolvedValueOnce(null);
     const response = await service.by_id(user.id);
     expect(response).toEqual(null);
   });
 
-  it('service should return null if repository found user', async () => {
+  it('"---By Id---"  service should return null if repository found user', async () => {
     const userData = {
       ...user,
       login: {
@@ -108,7 +134,7 @@ describe('Find User Repository Unit Tests', () => {
     expect(spy).toHaveBeenCalledTimes(1);
     expect(spy).toHaveBeenCalledWith({
       where: {
-        id: 'login',
+        login: { value_field: 'login' },
       },
       include: {
         login: true,
@@ -122,6 +148,24 @@ describe('Find User Repository Unit Tests', () => {
 
     const response = service.by_login('login');
     await expect(response).rejects.toThrow('Query Error');
+  });
+
+  it('"---By Login---"  service should log warning and error messages if repository error occurs', async () => {
+    const spyWarn = jest.spyOn(loggerMock, 'warn');
+    const spyError = jest.spyOn(loggerMock, 'error');
+
+    prismaMocked.user.findFirst.mockRejectedValueOnce(new Error('Query Error'));
+
+    const response = service.by_login('login');
+    await expect(response).rejects.toThrow('Query Error');
+
+    expect(spyWarn).toHaveBeenCalledTimes(1);
+    expect(spyWarn).toHaveBeenCalledWith(
+      '---Repository---- Error in find user by login',
+    );
+
+    expect(spyError).toHaveBeenCalledTimes(1);
+    expect(spyError).toHaveBeenCalledWith(new Error('Query Error').message);
   });
 
   it('---By Login--- service should return null if repository not found user', async () => {
@@ -151,20 +195,38 @@ describe('Find User Repository Unit Tests', () => {
     });
   });
 
-  it('---All--- service must to throw Query Error if ocurred an error in repository ', async () => {
+  it('"---All---" service must to throw Query Error if ocurred an error in repository ', async () => {
     prismaMocked.user.findMany.mockRejectedValueOnce(new Error('Query Error'));
 
     const response = service.all();
     await expect(response).rejects.toThrow('Query Error');
   });
 
-  it('---All--- service should return null if repository not found user', async () => {
-    prismaMocked.user.findFirst.mockResolvedValueOnce([]);
+  it('"---All---"  service should log warning and error messages if repository error occurs', async () => {
+    const spyWarn = jest.spyOn(loggerMock, 'warn');
+    const spyError = jest.spyOn(loggerMock, 'error');
+
+    prismaMocked.user.findMany.mockRejectedValueOnce(new Error('Query Error'));
+
+    const response = service.all();
+    await expect(response).rejects.toThrow('Query Error');
+
+    expect(spyWarn).toHaveBeenCalledTimes(1);
+    expect(spyWarn).toHaveBeenCalledWith(
+      '---Repository---- Error find all users',
+    );
+
+    expect(spyError).toHaveBeenCalledTimes(1);
+    expect(spyError).toHaveBeenCalledWith(new Error('Query Error').message);
+  });
+
+  it('"---All---" service should return null if repository not found user', async () => {
+    prismaMocked.user.findMany.mockResolvedValueOnce([]);
     const response = await service.all();
     expect(response).toHaveLength(0);
   });
 
-  it('---By Login--- service should return null if repository found user', async () => {
+  it('"---All---" service should return null if repository found user', async () => {
     prismaMocked.user.findMany.mockResolvedValueOnce([
       { ...user },
       { ...user },
