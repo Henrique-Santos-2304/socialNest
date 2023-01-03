@@ -2,7 +2,7 @@ type CreateHashParamsProps = string;
 type CreateHashResponseProps = Promise<string>;
 
 type CompareHashParamsProps = { hash: string; compare: string };
-type CompareHashResponseProps = Promise<string>;
+type CompareHashResponseProps = Promise<boolean>;
 
 abstract class IEncrypterService {
   abstract create(value: CreateHashParamsProps): CreateHashResponseProps;
