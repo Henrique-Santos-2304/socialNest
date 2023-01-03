@@ -6,8 +6,9 @@ import {
   CreateHashResponseProps,
   IEncrypterService,
 } from '@root/domain';
-import { Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
+@Injectable()
 class EncrypterService implements IEncrypterService {
   private readonly salt = 10;
 
@@ -17,10 +18,8 @@ class EncrypterService implements IEncrypterService {
     try {
       const hash = await bcrypt.hash(value, this.salt);
       return hash;
-    } catch (err) {
-      const error = err as Error;
-
-      this.logger.log('ERROR WHEN ENCRYPT PASSWORD');
+    } catch (error) {
+      this.logger.warn('ERROR WHEN ENCRYPT PASSWORD');
       this.logger.error(error.message);
       throw new Error('ENCRYPT ERROR');
     }
@@ -34,7 +33,7 @@ class EncrypterService implements IEncrypterService {
     } catch (err) {
       const error = err as Error;
 
-      this.logger.log('ERROR WHEN COMPARE PASSWORD');
+      this.logger.warn('ERROR WHEN COMPARE PASSWORD');
       this.logger.error(error.message);
       throw new Error('ENCRYPT ERROR');
     }

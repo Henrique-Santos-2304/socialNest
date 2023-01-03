@@ -1,9 +1,7 @@
-interface IUuidService {
-  create(): IUuidService.createResponse;
+type CreateUUidResponseProps = string;
+
+abstract class IUuidService {
+  abstract create(): CreateUUidResponseProps;
 }
 
-namespace IUuidService {
-  export type createResponse = string;
-}
-
-export { IUuidService };
+export { IUuidService, CreateUUidResponseProps };

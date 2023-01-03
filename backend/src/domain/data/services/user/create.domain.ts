@@ -2,14 +2,16 @@ import { TypeServiceReponse } from '@root/domain';
 import { CreateUserDto } from '@root/infra';
 
 abstract class CreateUserServiceContract {
-  abstract create(createUser: CreateUserParamsProps): CreateUserResponseProps;
+  abstract create(
+    createUser: CreateUserServiceParamsProps,
+  ): CreateUserServiceResponseProps;
 }
 
-type CreateUserParamsProps = CreateUserDto;
-type CreateUserResponseProps = Promise<TypeServiceReponse>;
+type CreateUserServiceParamsProps = CreateUserDto;
+type CreateUserServiceResponseProps = Promise<TypeServiceReponse>;
 
 export {
   CreateUserServiceContract,
-  CreateUserParamsProps,
-  CreateUserResponseProps,
+  CreateUserServiceParamsProps,
+  CreateUserServiceResponseProps,
 };
