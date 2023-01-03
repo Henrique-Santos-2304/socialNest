@@ -60,6 +60,7 @@ describe('Create User Service', () => {
 
     service = module.get<ICreateUserService>(ICreateUserService);
     uuidService.create.mockReturnValue('id_mocked');
+    createUserRepo.create.mockResolvedValue({ id: 'user' });
     findUserRepo.by_id.mockResolvedValue(null);
   });
 
@@ -132,7 +133,7 @@ describe('Create User Service', () => {
     jest
       .spyOn(obj, 'create', 'set')
       .mockImplementationOnce(() => new UserEntity());
-    jest.spyOn(obj, 'id', 'get').mockImplementationOnce(() => {
+    jest.spyOn(obj, 'get', 'get').mockImplementationOnce(() => {
       throw new Error('error');
     });
     const response = service.create({ ...createuserMocked });
@@ -140,13 +141,34 @@ describe('Create User Service', () => {
     await expect(response).rejects.toThrow(new Error('error'));
   });
 
-  it('should expects service return status Sucess and ', async () => {
+  it('should expects create user repository to have been called once and with valid data ', async () => {
     const obj = new CreateUserValueObject(uuidService, encrypterService);
-    jest
-      .spyOn(obj, 'create', 'set')
-      .mockImplementationOnce(() => new UserEntity());
+    const userEntity = new UserEntity();
+    jest.spyOn(obj, 'create', 'set').mockImplementationOnce(() => userEntity);
+    jest.spyOn(obj, 'get', 'get').mockImplementationOnce(() => userEntity);
+    const spy = jest.spyOn(createUserRepo, 'create');
+    await service.create({ ...createuserMocked });
 
-    jest.spyOn(obj, 'id', 'get').mockImplementationOnce(() => 'id_sucess');
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(spy).toHaveBeenCalledWith(userEntity);
+  });
+
+  it('should expects service to throw "Query Error" if create user repository throws', async () => {
+    const obj = new CreateUserValueObject(uuidService, encrypterService);
+    const userEntity = new UserEntity();
+    jest.spyOn(obj, 'create', 'set').mockImplementationOnce(() => userEntity);
+    jest.spyOn(obj, 'get', 'get').mockImplementationOnce(() => userEntity);
+    createUserRepo.create.mockRejectedValueOnce(new Error('Query Error'));
+    const response = service.create({ ...createuserMocked });
+
+    await expect(response).rejects.toThrow(new Error('Query Error'));
+  });
+
+  it('should expects service return user id if  ocurred all fine', async () => {
+    const obj = new CreateUserValueObject(uuidService, encrypterService);
+    const userEntity = new UserEntity();
+    jest.spyOn(obj, 'create', 'set').mockImplementationOnce(() => userEntity);
+    jest.spyOn(obj, 'get', 'get').mockImplementationOnce(() => userEntity);
     const response = await service.create({ ...createuserMocked });
 
     await expect(response).toBe('id_sucess');

@@ -1,10 +1,7 @@
-import { TypeServiceReponse } from '@root/domain';
 import { CreateUserDto, UserEntity } from '@root/infra';
 
 type CreateUserParamsProps = CreateUserDto;
-type CreateUserResponseProps = Promise<
-  { id?: UserEntity['id'] } & TypeServiceReponse
->;
+type CreateUserResponseProps = Promise<{ id: UserEntity['id'] }>;
 
 abstract class ICreateUserRepository {
   abstract create(userData: CreateUserParamsProps): CreateUserResponseProps;
