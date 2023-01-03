@@ -4,26 +4,26 @@ import { LoginEntity, UserEntity } from '@root/infra';
 type FindUserByIdParamsProps = UserEntity['id'];
 type FindUserByLoginProps = UserEntity['login']['value_field'];
 
-type OmitPasswordOfLogin = Omit<LoginEntity, 'password'>;
+type LoginWithoutPassword = { login: Omit<LoginEntity, 'password'> | null };
+type UserWithoutLogin = Omit<UserEntity, 'login'>;
 
 // Response
 type AllUserResponseProps = Promise<FindUserWithoutPasswordResponseProps[]>;
 type FindUserWithPassword = Promise<UserEntity>;
-type FindUserWithoutPasswordResponseProps = Promise<
-  Omit<UserEntity, 'login'> & OmitPasswordOfLogin
->;
+type FindUserWithoutPasswordResponseProps = UserWithoutLogin &
+  LoginWithoutPassword;
 
 // Abstract Class
-abstract class FindUserRepository {
+abstract class IFindUserRepository {
   abstract by_id(
     id: FindUserByIdParamsProps,
-  ): FindUserWithoutPasswordResponseProps;
+  ): Promise<FindUserWithoutPasswordResponseProps | null>;
   abstract by_login(login: FindUserByLoginProps): FindUserWithPassword;
   abstract all(): AllUserResponseProps;
 }
 
 export {
-  FindUserRepository,
+  IFindUserRepository,
   FindUserWithoutPasswordResponseProps,
   AllUserResponseProps,
   FindUserByIdParamsProps,
