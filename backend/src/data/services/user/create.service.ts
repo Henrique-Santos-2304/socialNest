@@ -8,9 +8,11 @@ import {
   IFindUserRepository,
   IUuidService,
 } from '@root/domain';
-import { CreateUserValueObject } from '@root/infra';
+import { CreateUserValueObject, LoginEntity, UserEntity } from '@root/infra';
 
 class CreateUserService implements ICreateUserService {
+  private userEntity: UserEntity;
+
   constructor(
     @Inject(IFindUserRepository)
     private readonly findUserRepository: IFindUserRepository,
@@ -22,25 +24,38 @@ class CreateUserService implements ICreateUserService {
     private readonly encrypterService: IEncrypterService,
   ) {}
 
-  async create(
-    createUser: CreateUserServiceParamsProps,
-  ): CreateUserServiceResponseProps {
-    const userExists = await this.findUserRepository.by_login(
-      createUser.login.value_field,
-    );
+  async checkUserAlreadExist(login: LoginEntity['value_field']) {
+    const userExists = await this.findUserRepository.by_login(login);
 
     if (userExists) throw new Error('User Already Exists');
+  }
 
+  createUserEntity(createUser: CreateUserServiceParamsProps) {
     const userVO = new CreateUserValueObject(
       this.uuidService,
       this.encrypterService,
     );
 
     userVO.create({ ...createUser });
-    const userEntity = userVO.get();
-    console.log(userEntity);
-    const createdUser = await this.createUserRepository.create(userEntity);
-    return createdUser;
+    return userVO;
+  }
+
+  setPropertyUserData(userVo: CreateUserValueObject) {
+    this.userEntity = userVo.get();
+  }
+
+  async createUser() {
+    return await this.createUserRepository.create(this.userEntity);
+  }
+
+  async create(
+    createUser: CreateUserServiceParamsProps,
+  ): CreateUserServiceResponseProps {
+    await this.checkUserAlreadExist(createUser.login.value_field);
+    const userVO = this.createUserEntity({ ...createUser });
+    this.setPropertyUserData(userVO);
+
+    return this.createUser();
   }
 }
 
